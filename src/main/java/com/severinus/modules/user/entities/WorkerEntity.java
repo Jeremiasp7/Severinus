@@ -8,6 +8,7 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,11 +21,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WorkerEntity {
     
+    @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(unique = true, nullable = false)
-    private String cpf_cnpj;
+    private String cpf_cnpj; // pode ser autônomo, mei, empresa, etc
 
     @Column(name = "nome_completo")
     private String nomeCompleto;
@@ -33,7 +35,7 @@ public class WorkerEntity {
     private String email;
 
     @Column(unique = true, nullable = false)
-    private String usuario;
+    private String nomeDeUsuario;
 
     @Column(name = "user_password")
     private String password;
