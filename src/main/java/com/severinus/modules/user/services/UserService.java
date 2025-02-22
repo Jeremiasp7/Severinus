@@ -18,7 +18,6 @@ public class UserService {
 
     public UserEntity criarUsuario(CreateUserDto dto) {
         UserEntity user = UserEntity.builder()
-            .id(UUID.randomUUID())
             .nomeCompleto(dto.getNomeCompleto())
             .cpf(dto.getCpf())
             .nomeDeUsuario(dto.getNomeDeUsuario())
