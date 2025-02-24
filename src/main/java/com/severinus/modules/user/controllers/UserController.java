@@ -9,20 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.severinus.modules.user.dto.CreateUserDto;
 import com.severinus.modules.user.entities.UserEntity;
-//import com.severinus.modules.user.repositories.UserRepository;
 import com.severinus.modules.user.services.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
-
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    
-    //@Autowired
-    //private UserRepository userRepository;
 
     @Autowired
     private UserService userService;

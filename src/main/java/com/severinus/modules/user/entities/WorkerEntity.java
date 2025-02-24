@@ -6,6 +6,7 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,9 +41,10 @@ public class WorkerEntity {
     @Column(name = "user_password")
     private String password;
 
-    @ElementCollection
-    private List<String> certificados; // Lista de url dos certificados
+    @Column(name = "profissoes")
+    private List<String> profissões; 
 
-    @ElementCollection
-    private List<String> profissões; // Lista de url dos certificados
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "certificados")
+    private List<String> certificados; 
 }
