@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.severinus.modules.user.dto.CreateConnectionDto;
 import com.severinus.modules.user.entities.ConnectionEntity;
 import com.severinus.modules.user.entities.ConnectionEntity.ConnectionStatus;
+import com.severinus.modules.user.entities.UserEntity;
 import com.severinus.modules.user.repositories.ConnectionRepository;
 
 @Service
@@ -26,7 +27,7 @@ public class ConnectionService {
         return connectionRepository.save(connection);
     }
 
-    public List<ConnectionEntity> buscarSolicitacoes() {
-        return connectionRepository.findByStatus(ConnectionStatus.PENDENTE);
+    public List<ConnectionEntity> buscarSolicitacoes(UserEntity user) {
+        return connectionRepository.findByUserAndStatus(user, ConnectionStatus.PENDENTE);
     }
 }

@@ -1,7 +1,9 @@
-package com.severinus.modules.user.entities;
+package com.severinus.modules.chat.entities;
 
 import java.util.List;
 import java.util.UUID;
+
+import com.severinus.modules.user.entities.UserEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
