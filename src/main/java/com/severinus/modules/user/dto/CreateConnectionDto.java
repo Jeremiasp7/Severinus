@@ -1,6 +1,6 @@
 package com.severinus.modules.user.dto;
 
-import com.severinus.modules.user.entities.UserEntity;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateConnectionDto {
     
-    private UserEntity solicitante;
-    private UserEntity recebedor;
+    private UUID solicitanteId;
+    private UUID recebedorId;
 }

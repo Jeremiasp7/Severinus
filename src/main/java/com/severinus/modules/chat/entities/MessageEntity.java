@@ -3,8 +3,6 @@ package com.severinus.modules.chat.entities;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.severinus.modules.user.entities.UserEntity;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,11 +34,11 @@ public class MessageEntity {
 
     @ManyToOne
     @JoinColumn(name = "destinatario_id")
-    private UserEntity destinatario;
+    private UUID destinatario;
 
     @ManyToOne
     @JoinColumn(name = "remetente_id")
-    private UserEntity remetente;
+    private UUID remetente;
 
     @Column(nullable = false, length = 1000)
     private String conteudo;

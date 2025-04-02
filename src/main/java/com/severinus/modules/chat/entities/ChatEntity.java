@@ -3,8 +3,6 @@ package com.severinus.modules.chat.entities;
 import java.util.List;
 import java.util.UUID;
 
-import com.severinus.modules.user.entities.UserEntity;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,12 +28,12 @@ public class ChatEntity {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "usuario1_id", nullable = false)
-    private UserEntity usuario1;
+    @JoinColumn(name = "utilizador_id", nullable = false)
+    private UUID utilizador1;
 
     @ManyToOne
-    @JoinColumn(name = "usuario2_id", nullable = false)
-    private UserEntity usuario2;
+    @JoinColumn(name = "utilizador_id", nullable = false)
+    private UUID utilizador2;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> mensagens;

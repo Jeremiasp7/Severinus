@@ -1,6 +1,7 @@
 package com.severinus.modules.user.controllers;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +22,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.severinus.modules.user.entities.FileStorageProperties;
 import com.severinus.modules.user.entities.WorkerEntity;
 import com.severinus.modules.user.repositories.WorkerRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.web.bind.annotation.GetMapping;
 
 
@@ -46,11 +55,12 @@ public class FileStorageController {
 
     @PostMapping("/upload/{userId}")
     @Transactional
-    public ResponseEntity<String> uploadFile(@PathVariable UUID userId,@RequestParam MultipartFile[] files) {
+    public ResponseEntity<String> uploadFile(@PathVariable UUID userId, @RequestParam MultipartFile[] files) {
         WorkerEntity worker = workerRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Trabalhador não encontrado"));
         
         List<String> updatedCertificatePaths = new ArrayList<>(worker.getCertificados());
+        List<String> failedFiles = new ArrayList<>();
 
         for (MultipartFile file : files) {
             @SuppressWarnings("null")
@@ -59,18 +69,48 @@ public class FileStorageController {
             try {
                 Path targetLocation = fileStorageLocation.resolve(fileName);
                 file.transferTo(targetLocation);
-    
                 updatedCertificatePaths.add(targetLocation.toString());
-                return ResponseEntity.ok("Upload completed!");
+
+                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/files/download/")
+                    .path(fileName)
+                    .toUriString();
+                updatedCertificatePaths.add(fileDownloadUri);
             } catch (IOException e) {
-                return ResponseEntity.badRequest().body("Falha no upload do arquivo" +fileName);
+                failedFiles.add(fileName);
             }
         }
 
-        worker.setCertificados(updatedCertificatePaths);
-        workerRepository.save(worker);
+        if (!updatedCertificatePaths.isEmpty()) {
+            worker.setCertificados(updatedCertificatePaths);
+            workerRepository.save(worker);
+        }
+
+        if (!failedFiles.isEmpty()) {
+            return ResponseEntity.badRequest().body("Falha ao fazer upload dos arquivos: " + String.join(", ", failedFiles));
+        }
         
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Upload concluído com sucesso");
+    }
+
+    @GetMapping("/download/{fileName:.+}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) throws IOException {
+        Path filePath = fileStorageLocation.resolve(fileName).normalize();
+
+        try {
+            Resource resource = new UrlResource(filePath.toUri());
+            String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +resource.getFilename() + "\"").body(resource);
+
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 
     @GetMapping("/certificates/{userId}")

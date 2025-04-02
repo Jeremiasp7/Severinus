@@ -27,12 +27,12 @@ public class ConnectionEntity {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_solicitante_id")
-    private UserEntity solicitante;
+    @JoinColumn(name = "solicitante_id")
+    private UUID solicitanteId;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_recebedor_id")
-    private UserEntity recebedor;
+    @JoinColumn(name = "recebedor_id")
+    private UUID recebedorId;
 
     @Enumerated(EnumType.STRING)
     private ConnectionStatus status;

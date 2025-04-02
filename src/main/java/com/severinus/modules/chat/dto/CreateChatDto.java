@@ -1,6 +1,6 @@
 package com.severinus.modules.chat.dto;
 
-import com.severinus.modules.user.entities.UserEntity;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateChatDto {
     
-    private UserEntity user1;
-    private UserEntity user2;
+    private UUID utilizador1;
+    private UUID utilizador2;
 }

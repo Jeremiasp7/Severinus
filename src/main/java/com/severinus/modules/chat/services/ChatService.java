@@ -15,6 +15,7 @@ import com.severinus.modules.chat.repositories.ChatRepository;
 import com.severinus.modules.chat.repositories.MessageRepository;
 import com.severinus.modules.user.entities.UserEntity;
 import com.severinus.modules.user.entities.ConnectionEntity.ConnectionStatus;
+import com.severinus.modules.user.repositories.UserRepository;
 import com.severinus.modules.user.services.ConnectionService;
 import com.severinus.modules.user.entities.ConnectionEntity;
 
@@ -34,16 +35,19 @@ public class ChatService {
     @Autowired
     private ConnectionService connectionService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     
-    public ChatEntity criarChat(UserEntity user1, UserEntity user2, CreateChatDto dto) {
-        List<ConnectionEntity> solicitacoes = connectionService.buscarSolicitacoes(user1);
+    public ChatEntity criarChat(UUID id1, UUID id2, CreateChatDto dto) {
+        List<ConnectionEntity> solicitacoes = connectionService.buscarSolicitacoes(id1);
         
-        for (ConnectionEntity user : solicitacoes) {
-            if (user.getSolicitante().equals(user2)) {
-                if (user.getStatus().equals(ConnectionStatus.ACEITA)) {
+        for (ConnectionEntity conec : solicitacoes) {
+            if (conec.getSolicitanteId().equals(id2)) {
+                if (conec.getStatus().equals(ConnectionStatus.ACEITA)) {
                     ChatEntity chat = ChatEntity.builder()
-                        .usuario1(dto.getUser1())
-                        .usuario2(dto.getUser2())
+                        .utilizador1(dto.getUtilizador1())
+                        .utilizador2(dto.getUtilizador2())
                         .build();
 
                         return chatRepository.save(chat);
@@ -54,16 +58,16 @@ public class ChatService {
         return null;
     }
 
-    public void mandarMensagem(UserEntity remetente, UserEntity destinatario, String mensagem) {
-        ChatEntity chat = chatRepository.findByUser1AndUser2(remetente, destinatario);
+    public void mandarMensagem(UUID remetenteId, UUID destinatarioId, String mensagem) {
+        ChatEntity chat = chatRepository.findByConsumer1AndConsumer2(remetenteId, destinatarioId);
 
         if (chat == null) {
-            chat = chatRepository.findByUser1AndUser2(destinatario, remetente);
+            chat = chatRepository.findByConsumer1AndConsumer2(destinatarioId, remetenteId);
         }
 
         MessageEntity message = MessageEntity.builder()
-            .remetente(remetente)
-            .destinatario(destinatario)
+            .remetente(remetenteId)
+            .destinatario(destinatarioId)
             .chat(chat)
             .conteudo(mensagem)
             .dataEnvio(LocalDateTime.now())
@@ -71,14 +75,14 @@ public class ChatService {
         
         messageRepository.save(message);
 
-        simpMessagingTemplate.convertAndSendToUser(destinatario.getNomeDeUsuario(), "/queue/messages", message);
+        UserEntity user = userRepository.findUserById(destinatarioId);
+
+        simpMessagingTemplate.convertAndSendToUser(user.getNomeDeUsuario(), "/queue/messages", message);
     }
 
     public List<MessageEntity> historicoDoChat(UUID chatId) {
-        // Busca o chat pelo chatId
         ChatEntity chat = chatRepository.getReferenceById(chatId);
     
-        // Retorna as mensagens associadas a esse chat
         return messageRepository.findByChat(chat);
     }
     

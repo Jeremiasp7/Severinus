@@ -14,5 +14,5 @@ public interface ConnectionRepository extends JpaRepository<ConnectionEntity, UU
     
     Optional<ConnectionEntity> findBySolicitanteAndRecebedorAndStatus(UserEntity solicitante, UserEntity recebedor, ConnectionStatus status);
 
-    public List<ConnectionEntity> findByUserAndStatus(UserEntity user, ConnectionStatus pendente);
+    public List<ConnectionEntity> findByIdAndStatus(UUID id, ConnectionStatus pendente);
 }
