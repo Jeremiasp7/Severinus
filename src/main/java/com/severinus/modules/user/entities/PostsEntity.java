@@ -37,11 +37,11 @@ public class PostsEntity {
     private List<String> tags;
 
     @ElementCollection
-    private List<String> imagePaths; // base64
+    private List<String> imagePaths; 
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private UserEntity usuario;
+    private UUID utilizador;
 
     @Column(name = "post_data")
     @CreationTimestamp

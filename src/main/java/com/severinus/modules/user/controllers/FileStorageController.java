@@ -53,7 +53,7 @@ public class FileStorageController {
         }
     }
 
-    @PostMapping("/upload/{userId}")
+    @PostMapping("/upload/certificates/{userId}")
     @Transactional
     public ResponseEntity<String> uploadFile(@PathVariable UUID userId, @RequestParam MultipartFile[] files) {
         WorkerEntity worker = workerRepository.findById(userId)
@@ -93,7 +93,7 @@ public class FileStorageController {
         return ResponseEntity.ok("Upload concluído com sucesso");
     }
 
-    @GetMapping("/download/{fileName:.+}")
+    @GetMapping("/download/certificates/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) throws IOException {
         Path filePath = fileStorageLocation.resolve(fileName).normalize();
 
