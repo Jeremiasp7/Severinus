@@ -95,42 +95,57 @@ contratação.
 
 ---
 
-## Fase 0 — Preparação
+## Fase 0 — Preparação ✅
 
 **Meta:** dependências e configuração prontas; banco recriado vazio.
 
-- [ ] Adicionar ao `pom.xml`:
+- [x] Adicionar ao `pom.xml`:
   - `spring-boot-starter-validation`
   - `flyway-core` + `flyway-database-postgresql`
   - `spring-boot-starter-oauth2-resource-server` (JWT via Nimbus, sem lib externa)
-  - `springdoc-openapi-starter-webmvc-ui` (Swagger — obrigatório por `AGENTS.md`)
-  - `mockito-junit-jupiter` (já vem via `spring-boot-starter-test`; confirmar)
-- [ ] Corrigir a indentação e remover o `<version>3.4.4</version>` explícito do
-      `spring-boot-starter-websocket` (`pom.xml:72-76`) — o parent BOM já fixa
-      3.4.2; a versão divergente pode gerar conflito.
-- [ ] `application.properties`:
-  ```properties
-  spring.jpa.hibernate.ddl-auto=validate
-  spring.flyway.enabled=true
-  spring.flyway.locations=classpath:db/migration
-  spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5434/pg_severinus}
-  spring.datasource.username=${DB_USER:admin}
-  spring.datasource.password=${DB_PASSWORD:admin}
-  app.jwt.secret=${JWT_SECRET}
-  app.jwt.expiration=3600
+  - `springdoc-openapi-starter-webmvc-ui` 2.8.3 (Swagger — obrigatório por `AGENTS.md`)
+  - `mockito-junit-jupiter` — confirmado: já vem via `spring-boot-starter-test`
+- [x] Corrigir a indentação e remover o `<version>3.4.4</version>` explícito do
+      `spring-boot-starter-websocket` — o parent BOM já fixa 3.4.2.
+- [x] `application.properties` com `ddl-auto=validate`, Flyway, credenciais por
+      variável de ambiente, JWT e springdoc.
+- [x] `OpenApiConfig` (`com.severinus.config`) com metadados e o `securityScheme`
+      `bearerAuth` do tipo HTTP/JWT.
+- [x] Criar `.env.example` documentando as variáveis. Não versionar `.env`.
+- [x] `.gitignore`: adicionar `uploads/`, `.env` e `.env.*` (com exceção para
+      `.env.example`).
+- [x] Recriar o banco vazio.
+- [x] `README.md` com setup, comandos e tabela de variáveis de ambiente.
 
-  springdoc.swagger-ui.path=/swagger-ui.html
-  ```
-- [ ] `OpenApiConfig` com `@OpenAPIDefinition` (título, versão, descrição) e o
-      `securityScheme` `bearerAuth` do tipo HTTP/JWT.
-- [ ] Criar `.env.example` documentando as variáveis. Não versionar `.env`.
-- [ ] `.gitignore`: adicionar `uploads/` e `.env`.
-- [ ] Recriar o banco vazio:
-  ```bash
-  docker compose down -v && docker compose up -d
-  ```
+**Aceite:** ✅ `./mvnw -o compile` passa. Container do Postgres no ar e saudável,
+banco vazio, Flyway conectando (`Successfully validated 0 migrations`). O único
+erro restante no boot é o de mapeamento JPA, alvo da Fase 1.
 
-**Aceite:** `./mvnw -o compile` passa; container do Postgres no ar com banco vazio.
+### Ajustes feitos durante a execução
+
+**Porta do banco: 5434 → 5435.** A máquina de desenvolvimento tem três instâncias
+**nativas** do PostgreSQL rodando como serviço do Windows
+(`postgresql-x64-16`, `-17`, `-18`), ocupando as portas 5432, 5433 e 5434. O
+container publicava em 5434 e era silenciosamente sombreado pela instalação
+nativa — daí o `FATAL: autenticação do tipo senha falhou para o usuário "admin"`
+que aparecia mesmo com o container saudável e com `docker exec psql` funcionando.
+
+Esse era o erro observado já na primeira execução dos testes, antes de qualquer
+alteração. Decidido mover o Severinus para a 5435 (livre) em vez de mexer nos
+serviços nativos, que podem atender outros projetos.
+
+Refletido em: `docker-compose.yml`, `application.properties`, `.env.example`,
+`README.md`.
+
+**Melhorias no `docker-compose.yml`:**
+
+- removido o atributo `version`, obsoleto no Compose v2 (emitia warning a cada comando);
+- imagem fixada em `postgres:16` — `postgres` sem tag pega `latest` e quebra
+  reprodutibilidade;
+- **volume nomeado** `severinus_pgdata` no lugar de volume anônimo, para os dados
+  sobreviverem a `docker compose down`;
+- `healthcheck` com `pg_isready`, permitindo aguardar o banco ficar pronto;
+- credenciais por variável de ambiente, com default de desenvolvimento.
 
 ---
 

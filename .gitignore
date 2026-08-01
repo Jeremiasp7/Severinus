@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Severinus ###
+# Segredos: só o .env.example é versionado
+.env
+.env.*
+!.env.example
+
+# Arquivos enviados pelos usuários (certificados, imagens de post)
+uploads/
